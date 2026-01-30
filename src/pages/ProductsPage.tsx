@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import ProductList from '../components/ProductList';
+import Loading from '../components/Loading';
+import requests from '../api/apiClient';
+import type { Product } from '../types/Product';
 
 
 const ProductsPage = () => {
 
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -12,9 +15,8 @@ const ProductsPage = () => {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await fetch('http://localhost:5001/products');
-        const data = await response.json();
-        setProducts(data);
+        const response = await requests.products.list();
+        setProducts(response);
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -27,7 +29,7 @@ const ProductsPage = () => {
   }, []);
 
   if(loading) {
-    return <div>Loading...</div>
+    return <Loading message="Loading products..." />
   }
 
   return <ProductList products={products} />

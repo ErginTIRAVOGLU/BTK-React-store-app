@@ -7,6 +7,7 @@ import { Link, NavLink } from 'react-router';
 const links = [
   { title: 'Home', path: '/' },
   { title: 'Products', path: '/products' },
+  { title: 'Errors', path: '/errors' },
 ]
 
 const authLinks = [
