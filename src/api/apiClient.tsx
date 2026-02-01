@@ -2,6 +2,7 @@ import axios from "axios";
 import type { Product } from "../types/Product";
 import { toast } from "react-toastify";
 import { router } from "../router";
+import type { Cart } from "../types/Cart";
  
 
 axios.defaults.baseURL = "http://localhost:5001/";
@@ -81,8 +82,8 @@ const errors = {
     getValidationError: () => methods.get('errors/validation-error').catch(err => { console.log(err) }),
 };
 
-const carts = {
-    getCart: () => methods.get('carts'),
+const carts = { 
+    getCart: () =>  methods.get<Cart>('carts'),
     addItem: (productId: string, quantity = 1) => 
         methods.post<void>(`carts?productId=${productId}&quantity=${quantity}`, {}),
     removeItem: (productId: string, quantity = 1) => 
