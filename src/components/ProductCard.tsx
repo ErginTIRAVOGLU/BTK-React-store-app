@@ -5,14 +5,17 @@ import { Link } from 'react-router';
 import { currencyTRY } from '../utils/formats';
 import type { Product } from '../types/Product';
 import requests from '../api/apiClient';
+import { useCartContext } from '../context/CartContext';
 
 const ProductCard = ({ product }: { product: Product }) => {
     const [loading, setLoading] = useState(false);
+    const { setCart } = useCartContext();
 
     function handleAddItem(productId: string) {
         setLoading(true);
-        requests.carts.addItem(productId)
-            .then(() => console.log("Item added to cart"))
+        requests.carts
+            .addItem(productId)
+            .then(cart => setCart(cart))
             .catch(error => console.log("Error adding item to cart:", error))
             .finally(() => setLoading(false));
     }

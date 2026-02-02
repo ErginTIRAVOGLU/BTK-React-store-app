@@ -1,8 +1,8 @@
-import { useContext, useEffect } from "react";  
+import { useEffect } from "react";
 import requests from "./api/apiClient";
 import { RouterProvider } from "react-router";
 import { router } from "./router";
-import { CartContext, useCartContext } from "./context/CartContext";
+import { useCartContext } from "./context/CartContext";
 
 function App() {
 

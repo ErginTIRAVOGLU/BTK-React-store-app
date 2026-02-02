@@ -1,32 +1,39 @@
-import React, { useEffect, useState } from 'react'
-import requests from '../api/apiClient';
-import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import type { Product } from '../types/Product';
-import type { Cart, CartItem } from '../types/Cart';
+import { Button, CircularProgress, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { currencyTRY } from '../utils/formats';
-import { Delete } from '@mui/icons-material';
-import Loading from '../components/Loading';
+import { AddCircleOutline, Delete, Remove, RemoveCircleOutline } from '@mui/icons-material';
+import { useCartContext } from '../context/CartContext';
+import { useState } from 'react';
+import requests from '../api/apiClient';
+
 
 const CartPage = () => {
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    requests.carts.getCart()
-      .then(cart => {
-        console.log("Cart from API:", cart);
-        setCart(cart);
-        setLoading(false);
-      })
-      .catch(error => console.log("Error fetching cart:", error))
-      .finally(() => setLoading(false));
-  }, []);
+  const { cart, setCart } = useCartContext();
+  const [status, setStatus] = useState({ loading: false, id: "" });
 
-  if(loading) {
-    return <Loading message="Yükleniyor..." />
-  }
-  if(!cart) {
+  const subTotal = cart?.cartItems.reduce((total, item) => total + ((Number(item.product?.price) ?? 0) * (Number(item.product?.quantity) ?? 0)), 0) ?? 0;
+
+  const tax = subTotal * 0.20;
+  const total = subTotal + tax;
+
+  if (!cart || cart.cartItems.length === 0) {
     return <Typography component="h4">Ürün Yok</Typography>
+  }
+
+  function handleAddItem(productId: string, id: string) {
+    setStatus({ loading: true, id: id });
+    requests.carts.addItem(productId)
+      .then((cart) => setCart(cart))
+      .catch((error) => console.log("Error adding item to cart:", error))
+      .finally(() => setStatus({ loading: false, id: "" }));
+  }
+
+  function handleRemoveItem(productId: string, id:string, quantity: number = 1) {
+    setStatus({ loading: true, id: id });
+    requests.carts.removeItem(productId, quantity)
+      .then((cart) => setCart(cart))
+      .catch((error) => console.log("Error removing item from cart:", error))
+      .finally(() => setStatus({ loading: false, id: "" }));
   }
 
   return (
@@ -48,19 +55,67 @@ const CartPage = () => {
               <TableRow key={item.id}>
                 <TableCell>
                   <img src={`http://localhost:5001/images/${item.product.image}`} alt={item.product.title} width={"50px"} />
-                  </TableCell>
+                </TableCell>
                 <TableCell>{item.product.title}</TableCell>
                 <TableCell>{currencyTRY.format(item.product.price)} ₺</TableCell>
-                <TableCell>{item.product.quantity}</TableCell>
+                <TableCell>
+
+                  <Button onClick={() => handleAddItem(item.product.productId, "add" + item.product.productId)}>
+                    {status.loading && status.id === "add" + item.product.productId ?
+                      (
+                        <CircularProgress size={24} />
+                      ) :
+                      (
+                        <AddCircleOutline />
+                      )
+                    }
+                  </Button>
+                  {item.product.quantity}
+                  <Button onClick={() => handleRemoveItem(item.product.productId, "remove" + item.product.productId)}>
+                    {status.loading && status.id === "remove" + item.product.productId ?
+                      (
+                        <CircularProgress size={24} />
+                      ) :
+                      (
+                        <RemoveCircleOutline />
+                      )
+                    }
+                  </Button>
+
+                </TableCell>
                 <TableCell>{currencyTRY.format(((item.product.price) * item.product.quantity).toFixed(2))} ₺</TableCell>
                 <TableCell>
-                  <IconButton color="error">
-                    <Delete />
+                  <IconButton color="error" onClick={() => handleRemoveItem(item.product.productId, "remove_all" + item.product.productId, item.product.quantity)}>
+                    {status.loading && status.id === "remove_all" + item.product.productId ?
+                      (
+                        <CircularProgress size={24} />
+                      ) :
+                      (
+                        <Delete />
+                      )
+                    }
                   </IconButton>
                 </TableCell>
               </TableRow>
             ))
           }
+          <TableRow>
+        
+            <TableCell align='right' colSpan={5}>Ara Toplam</TableCell>
+            <TableCell align='right' >{currencyTRY.format(subTotal)} ₺</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell align='right' colSpan={5}>KDV (20%)</TableCell>
+            <TableCell align='right' >{currencyTRY.format(tax)} ₺</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell align='right' colSpan={5}>
+              <Typography variant="h6">Genel Toplam</Typography>
+            </TableCell>
+            <TableCell align='right' >
+              <Typography variant="h6">{currencyTRY.format(total)} ₺</Typography>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </TableContainer>

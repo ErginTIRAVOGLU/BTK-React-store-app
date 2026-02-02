@@ -1,15 +1,27 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router';
 import ProductItem from '../components/ProductItem';
 import Loading from '../components/Loading';
 import requests from '../api/apiClient';
 import type { Product } from '../types/Product';
+import { useCartContext } from '../context/CartContext';
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
-  const [loading, setLoading] = React.useState(true);
-  const [product, setProduct] = React.useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
+  const {cart, setCart} = useCartContext();
 
+  const cartItem = cart?.cartItems.find(item => item.product?.productId === product?.id);
+
+  function handleAddItem(productId: string) {
+    setIsAdding(true);
+     requests.carts.addItem(productId)
+       .then((cart) => setCart(cart))
+       .catch((error) => console.log("Error adding item to cart:", error))
+       .finally(() => setIsAdding(false));
+  }
 
   useEffect(() => {
     async function fetchProduct() {
@@ -44,7 +56,7 @@ const ProductDetailsPage = () => {
   }
 
   return (
-    <ProductItem product={product} />
+    <ProductItem product={product} handleAddItem={handleAddItem} cartItem={cartItem} isAdding={isAdding} />
   )
 }
 

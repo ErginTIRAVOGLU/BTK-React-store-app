@@ -2,10 +2,16 @@ import React from 'react'
 import type { Product } from '../types/Product'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
-import { Typography } from '@mui/material'
+import { Button, CircularProgress, Stack, Typography } from '@mui/material'
+import ReportIcon from '@mui/icons-material/Report'
 import { currencyTRY } from '../utils/formats'
+import type { CartItem } from '../types/Cart'
 
-const ProductItem = ({ product }: { product: Product | null }) => {
+const ProductItem = ({
+    product,
+    handleAddItem,
+    cartItem,
+    isAdding }: { product: Product | null, handleAddItem: (productId: string) => void, cartItem: CartItem, isAdding: boolean }) => {
     return (
         <Grid container spacing={2}>
             <Grid size={{ lg: 4, md: 5, sm: 6, xs: 12 }}>
@@ -23,8 +29,24 @@ const ProductItem = ({ product }: { product: Product | null }) => {
                         {product?.description}
                     </Typography>
                     <Typography variant='body1'>
-                       {currencyTRY.format(product?.price!)}
+                        {currencyTRY.format(product?.price!)}
                     </Typography>
+                    <Typography variant='h5' color="secondary" sx={{ mt: 3 }}>
+                        {currencyTRY.format(product?.price!)}
+                    </Typography>
+                    <Stack direction={'row'} display={"flex"} alignItems="center" gap={2} sx={{ mt: 3 }}>
+                        <Button onClick={() => handleAddItem(product?.id!)} variant='contained' color='secondary' sx={{ mt: 3 }}>
+                            Add to Cart
+                        </Button>
+                        {cartItem && (
+                            <Typography variant='body2' sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                               <ReportIcon color="secondary" /> In Cart: {cartItem.product.quantity}
+                            </Typography>
+                        )}
+                        {
+                            isAdding && <CircularProgress size={24} />
+                        }
+                    </Stack>
                 </Paper>
 
 
