@@ -1,16 +1,23 @@
 import { Button, CircularProgress, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import { currencyTRY } from '../utils/formats';
-import { AddCircleOutline, Delete, Remove, RemoveCircleOutline } from '@mui/icons-material';
-import { useCartContext } from '../context/CartContext';
+ 
+import { AddCircleOutline, Delete,  RemoveCircleOutline } from '@mui/icons-material';
+ 
 import { useState } from 'react';
-import requests from '../api/apiClient';
+import { useCartContext } from '../../context/CartContext';
+import requests from '../../api/apiClient';
+import { currencyTRY } from '../../utils/formats';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCart } from './cartSlice';
+ 
 
 
 const CartPage = () => {
 
-  const { cart, setCart } = useCartContext();
-  const [status, setStatus] = useState({ loading: false, id: "" });
 
+  const [status, setStatus] = useState({ loading: false, id: "" });
+  const {cart} = useSelector((state: any) => state.cart);
+  const dispatch = useDispatch();
+  
   const subTotal = cart?.cartItems.reduce((total, item) => total + ((Number(item.product?.price) ?? 0) * (Number(item.product?.quantity) ?? 0)), 0) ?? 0;
 
   const tax = subTotal * 0.20;
@@ -23,7 +30,7 @@ const CartPage = () => {
   function handleAddItem(productId: string, id: string) {
     setStatus({ loading: true, id: id });
     requests.carts.addItem(productId)
-      .then((cart) => setCart(cart))
+      .then((cart) => dispatch(setCart(cart)))
       .catch((error) => console.log("Error adding item to cart:", error))
       .finally(() => setStatus({ loading: false, id: "" }));
   }
@@ -31,7 +38,7 @@ const CartPage = () => {
   function handleRemoveItem(productId: string, id:string, quantity: number = 1) {
     setStatus({ loading: true, id: id });
     requests.carts.removeItem(productId, quantity)
-      .then((cart) => setCart(cart))
+      .then((cart) =>  dispatch(setCart(cart)))
       .catch((error) => console.log("Error removing item from cart:", error))
       .finally(() => setStatus({ loading: false, id: "" }));
   }

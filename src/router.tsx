@@ -1,7 +1,6 @@
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
-import CartPage from "./pages/CartPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
@@ -9,6 +8,7 @@ import ErrorPage from "./pages/errors/ErrorPage";
 import ServerErrorPage from "./pages/errors/ServerErrorPage";
 import NotFoundPage from "./pages/errors/NotFoundPage";
 import { createBrowserRouter } from "react-router";
+import CartPage from "./pages/cart/CartPage";
 
 export const router = createBrowserRouter([
   {
