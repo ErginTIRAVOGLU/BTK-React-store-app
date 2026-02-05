@@ -7,15 +7,15 @@ import { useCartContext } from '../../context/CartContext';
 import requests from '../../api/apiClient';
 import { currencyTRY } from '../../utils/formats';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCart } from './cartSlice';
+import { addItemToCart, deleteItemFromCart, setCart } from './cartSlice';
  
 
 
 const CartPage = () => {
 
 
-  const [status, setStatus] = useState({ loading: false, id: "" });
-  const {cart} = useSelector((state: any) => state.cart);
+  //const [status, setStatus] = useState({ loading: false, id: "" });
+  const {cart, status} = useSelector((state: any) => state.cart);
   const dispatch = useDispatch();
   
   const subTotal = cart?.cartItems.reduce((total, item) => total + ((Number(item.product?.price) ?? 0) * (Number(item.product?.quantity) ?? 0)), 0) ?? 0;
@@ -26,7 +26,7 @@ const CartPage = () => {
   if (!cart || cart.cartItems.length === 0) {
     return <Typography component="h4">Ürün Yok</Typography>
   }
-
+/*
   function handleAddItem(productId: string, id: string) {
     setStatus({ loading: true, id: id });
     requests.carts.addItem(productId)
@@ -42,6 +42,8 @@ const CartPage = () => {
       .catch((error) => console.log("Error removing item from cart:", error))
       .finally(() => setStatus({ loading: false, id: "" }));
   }
+*/
+
 
   return (
     <TableContainer component={Paper}>
@@ -67,8 +69,8 @@ const CartPage = () => {
                 <TableCell>{currencyTRY.format(item.product.price)} ₺</TableCell>
                 <TableCell>
 
-                  <Button onClick={() => handleAddItem(item.product.productId, "add" + item.product.productId)}>
-                    {status.loading && status.id === "add" + item.product.productId ?
+                  <Button onClick={() => dispatch(addItemToCart({ productId: item.product.productId }))}>
+                    {status === "pendingAddItem" + item.product.productId ?
                       (
                         <CircularProgress size={24} />
                       ) :
@@ -78,8 +80,8 @@ const CartPage = () => {
                     }
                   </Button>
                   {item.product.quantity}
-                  <Button onClick={() => handleRemoveItem(item.product.productId, "remove" + item.product.productId)}>
-                    {status.loading && status.id === "remove" + item.product.productId ?
+                  <Button onClick={() => dispatch(deleteItemFromCart({ productId: item.product.productId, quantity: 1, key: "single" }))}>
+                    {status === "pendingDeleteItem" + item.product.productId + "single" ?
                       (
                         <CircularProgress size={24} />
                       ) :
@@ -92,8 +94,8 @@ const CartPage = () => {
                 </TableCell>
                 <TableCell>{currencyTRY.format(((item.product.price) * item.product.quantity).toFixed(2))} ₺</TableCell>
                 <TableCell>
-                  <IconButton color="error" onClick={() => handleRemoveItem(item.product.productId, "remove_all" + item.product.productId, item.product.quantity)}>
-                    {status.loading && status.id === "remove_all" + item.product.productId ?
+                  <IconButton color="error" onClick={() => dispatch(deleteItemFromCart({ productId: item.product.productId, quantity: item.product.quantity, key: "all" }))}>
+                    {status === "pendingDeleteItem" + item.product.productId + "all" ?
                       (
                         <CircularProgress size={24} />
                       ) :
